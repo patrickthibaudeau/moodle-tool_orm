@@ -140,6 +140,7 @@ class Orm
 
     private function CreateSearchRecordsFile()
     {
+        // Create file structure
         $file_in = "<?php\n";
         $file_in .= $this->Copyright();
         $file_in .= "\nnamespace " . $this->namespace . ";\n";
