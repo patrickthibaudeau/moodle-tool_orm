@@ -161,7 +161,7 @@ class Orm
         $file_in .= "\n	/**\n";
         $file_in .= "	  * Get records\n";
         $file_in .= "	 */\n";
-        $file_in .= "	public function getRecords() {\n";
+        $file_in .= "	public function get_records() {\n";
         $file_in .= "	    return \$this->results;\n";
         $file_in .= "	}\n";
         $file_in .= "\n	/**\n";
@@ -169,7 +169,7 @@ class Orm
         $file_in .= "	  * Defaults used key = record id, value = name \n";
         $file_in .= "	  * Modify as required. \n";
         $file_in .= "	 */\n";
-        $file_in .= "	public function getSelectArray() {\n";
+        $file_in .= "	public function get_select_array() {\n";
         $file_in .= "	    \$array = [\n";
         $file_in .= "	        '' => get_string('select', '" . $this->namespace . "')\n";
         $file_in .= "	      ];\n";
