@@ -110,22 +110,17 @@ class Orm
     {
         global $CFG;
 
+        $this->createCrudFile();
+
         $file_in = "<?php\n";
         $file_in .= $this->Copyright();
         $file_in .= "\nnamespace " . $this->namespace . ";\n";
-        $file_in .= "\nclass " . $this->classname . " {\n\n";
+        $file_in .= "\nuse " . $this->namespace . "\crud;\n";
+        $file_in .= "\nclass " . $this->classname . " extends crud {\n\n";
 
         $file_in = $this->CreateVars($file_in);
 
         if ($this->construct) $file_in = $this->CreateConstruct($file_in);
-
-        if ($this->load_row_from_key) $file_in = $this->CreateFunctionGetRecord($file_in);
-
-        if ($this->delete_row_from_key) $file_in = $this->CreateFunctionDeleteRecord($file_in);
-
-        if ($this->save_active_row) $file_in = $this->CreateFunctionInsertRecord($file_in);
-
-        if ($this->save_active_row_as_new) $file_in = $this->CreateFunctionUpdateRecord($file_in);
 
         if ($this->seters) $file_in = $this->CreateFunctionGetters($file_in);
 
@@ -136,6 +131,49 @@ class Orm
         $this->SaveFile($this->classname . ".php", $file_in);
         // Create search all records class
         $this->CreateSearchRecordsFile();
+    }
+
+    private function createCrudFile() {
+        $file_in = "<?php\n";
+        $file_in .= $this->Copyright();
+        $file_in .= "\nnamespace " . $this->namespace . ";\n";
+        $file_in .= "\nabstract class crud {\n\n";
+
+        $file_in .=  "\n/**";
+        $file_in .=  "\n/* string";
+        $file_in .=  "\n**/";
+        $file_in .=  "\nprivate \$table;\n";
+
+        $file_in .=  "\n/**";
+        $file_in .=  "\n/* int";
+        $file_in .=  "\n**/";
+        $file_in .=  "\nprivate \$id;\n";
+
+        if ($this->load_row_from_key) $file_in = $this->CreateFunctionGetRecord($file_in);
+
+        if ($this->delete_row_from_key) $file_in = $this->CreateFunctionDeleteRecord($file_in);
+
+        if ($this->save_active_row) $file_in = $this->CreateFunctionInsertRecord($file_in);
+
+        if ($this->save_active_row_as_new) $file_in = $this->CreateFunctionUpdateRecord($file_in);
+
+        $file_in .=  "\n/**";
+        $file_in .=  "\n/* get id";
+        $file_in .=  "\n**/";
+        $file_in .=  "\npublic function get_id() {\n";
+        $file_in .=  "  return \$this->id;\n";
+        $file_in .=  "}\n";
+
+        $file_in .=  "\n/**";
+        $file_in .=  "\n/* get table";
+        $file_in .=  "\n**/";
+        $file_in .=  "\npublic function get_table() {\n";
+        $file_in .=  "  return \$this->table;\n";
+        $file_in .=  "}\n";
+
+        $file_in .= "\n}";
+
+        $this->SaveFile( "crud.php", $file_in);
     }
 
     private function CreateSearchRecordsFile()
@@ -237,21 +275,19 @@ class Orm
      * Insert record into selected table
      * @global \moodle_database \$DB
      * @global \stdClass \$USER
-     * @param array or object \$data
+     * @param object \$data
      */";
         $file_in .= "\n	public function insert_record(\$data){\n";
         $file_in .= "		global \$DB, \$USER;\n";
-        $file_in .= "\n		if (is_object(\$data)) {\n";
-        $file_in .= "		    \$data = convert_to_array(\$data);\n";
+
+        $file_in .= "\n		if (!isset(\$data->timecreated)) {\n";
+        $file_in .= "		    \$data->timecreated = time();\n";
         $file_in .= "		}\n";
-        $file_in .= "\n		if (!isset(\$data['timecreated'])) {\n";
-        $file_in .= "		    \$data['timecreated'] = time();\n";
-        $file_in .= "		}\n";
-        $file_in .= "\n		if (!isset(\$data['timemodified'])) {\n";
-        $file_in .= "		    \$data['timemodified'] = time();\n";
+        $file_in .= "\n		if (!isset(\$data->imemodified)) {\n";
+        $file_in .= "		    \$data->timemodified = time();\n";
         $file_in .= "		}\n";
         $file_in .= "\n		//Set user\n";
-        $file_in .= "		\$data['usermodified'] = \$USER->id;\n";
+        $file_in .= "		\$data->usermodified = \$USER->id;\n";
         $file_in .= "\n		\$id = \$DB->insert_record(\$this->table, \$data);\n";
         $file_in .= "\n		return \$id;\n";
         $file_in .= "	}\n";
@@ -269,18 +305,15 @@ class Orm
      * Update record into selected table
      * @global \moodle_database \$DB
      * @global \stdClass \$USER
-     * @param array or object \$data
+     * @param object \$data
      */";
         $file_in .= "\n	public function update_record(\$data){\n";
         $file_in .= "		global \$DB, \$USER;\n";
-        $file_in .= "\n		if (is_object(\$data)) {\n";
-        $file_in .= "		    \$data = convert_to_array(\$data);\n";
-        $file_in .= "		}\n";
-        $file_in .= "\n		if (!isset(\$data['timemodified'])) {\n";
-        $file_in .= "		    \$data['timemodified'] = time();\n";
+        $file_in .= "\n		if (!isset(\$data->timemodified)) {\n";
+        $file_in .= "		    \$data->timemodified = time();\n";
         $file_in .= "		}\n";
         $file_in .= "\n		//Set user\n";
-        $file_in .= "		\$data['usermodified'] = \$USER->id;\n";
+        $file_in .= "		\$data->usermodified = \$USER->id;\n";
         $file_in .= "\n		\$id = \$DB->update_record(\$this->table, \$data);\n";
         $file_in .= "\n		return \$id;\n";
         $file_in .= "	}\n";
@@ -390,12 +423,15 @@ class Orm
         $file .= "\n	public function __construct(\$id = 0){\n";
         $file .= "  	global \$CFG, \$DB, \$DB;\n";
         $file .= "\n		\$this->table = '" . $this->table . "';\n";
+        $file .= "\n		parent::set_table(\$this->table);\n";
         $file .= "\n      if (\$id) {\n";
         $file .= "         \$this->id = \$id;\n";
-        $file .= "         \$result = \$this->get_record();\n";
+        $file .= "         parent::set_id(\$this->id);\n";
+        $file .= "         \$result = \$this->get_record(\$this->table, \$this->id);\n";
         $file .= "      } else {\n";
         $file .= "        \$result = new \stdClass();\n";
         $file .= "         \$this->id = 0;\n";
+        $file .= "         parent::set_id(\$this->id);\n";
         $file .= "      }\n\n";
 
         for ($i = 0; $i != $this->classe_name[$this->num_of_tables]['total_vars']; $i++) {
@@ -465,9 +501,15 @@ class Orm
             exit("cannot open <$filename>\n");
         }
 //        print_object(file_get_contents($this->path . '/' . $this->time . '/' . $this->classname . '.php'));
+        // Add crud file
+        if (file_exists($this->path . '/' . $this->time . '/' .  'crud.php')) {
+            $zip->addFile($this->path . '/' . $this->time . '/' . 'crud.php',  'crud.php');
+        }
+        // Add singular class
         if (file_exists($this->path . '/' . $this->time . '/' . $this->classname . '.php')) {
             $zip->addFile($this->path . '/' . $this->time . '/' . $this->classname . '.php', $this->classname . '.php');
         }
+        // Add plural class
         if (file_exists($this->path . '/' . $this->time . '/' . $this->classname . 's.php')) {
             $zip->addFile($this->path . '/' . $this->time . '/' . $this->classname . 's.php', $this->classname . 's.php');
         }
