@@ -445,13 +445,13 @@ class Orm
                 if ($this->classe_variables[$i]['var_name'] == 'timecreated') {
                     $file .= "          \$this->timecreated_hr = '';\n";
                     $file .= "          if (\$this->timecreated) {\n";
-                    $file .= "		        \$this->" . $this->classe_variables[$i]['var_name'] . "_hr = strftime(get_string('strftimedate'),\$result->" . $this->classe_variables[$i]['var_name'] . ");\n";
+                    $file .= "		        \$this->" . $this->classe_variables[$i]['var_name'] . "_hr = userdate(\$result->" . $this->classe_variables[$i]['var_name'] . ",get_string('strftimedate'));\n";
                     $file .= "          }\n";
                 }
                 if ($this->classe_variables[$i]['var_name'] == 'timemodified') {
                     $file .= "      \$this->timemodified_hr = '';\n";
                     $file .= "          if (\$this->timemodified) {\n";
-                    $file .= "		        \$this->" . $this->classe_variables[$i]['var_name'] . "_hr = strftime(get_string('strftimedate'),\$result->" . $this->classe_variables[$i]['var_name'] . ");\n";
+                    $file .= "		        \$this->" . $this->classe_variables[$i]['var_name'] . "_hr = userdate(\$result->" . $this->classe_variables[$i]['var_name'] . ",get_string('strftimedate'));\n";
                     $file .= "          }\n";
                 }
             }
